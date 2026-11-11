@@ -1,0 +1,12 @@
+import * as THREE from 'three';
+import { createNoise2D } from 'simplex-noise';
+export type Settings={seed:string,preset:string,water:number};
+const hash=(s:string)=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+export class World {
+ scene:THREE.Scene; settings:Settings; chunks=new Map<string,THREE.Group>(); placed=new Map<string,{type:string,rotation:number}>(); deleted=new Set<string>(); noise:(x:number,y:number)=>number; chunkSize=32; tile=2;
+ constructor(scene:THREE.Scene,s:Settings){this.scene=scene;this.settings=s;let n=hash(s.seed);this.noise=createNoise2D(()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296})}
+ elevation(x:number,z:number){let p=this.settings.preset; if(p==='Flat Plains')return this.noise(x*.015,z*.015)*.35+this.noise(x*.06,z*.06)*.12; let n=this.noise(x*.015,z*.015)*.55+this.noise(x*.05,z*.05)*.24+this.noise(x*.13,z*.13)*.07; if(p==='Islands & Coastlines') n+= Math.sin(x*.006)*Math.cos(z*.007)*.3-.18; if(p==='Mountains & Valleys')n*=2;return n}
+ key(x:number,z:number){return `${x},${z}`}
+ sync(cx:number,cz:number){const radius=2, needed=new Set<string>();for(let a=cx-radius;a<=cx+radius;a++)for(let b=cz-radius;b<=cz+radius;b++){let k=`${a},${b}`;needed.add(k);if(!this.chunks.has(k))this.make(a,b,k)}for(const [k,g] of this.chunks)if(!needed.has(k)){this.scene.remove(g);g.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();(o.material as THREE.Material).dispose()}});this.chunks.delete(k)}}
+ make(cx:number,cz:number,k:string){const g=new THREE.Group(),geo=new THREE.BoxGeometry(this.tile,.4,this.tile);geo.translate(0,-.2,0);const mats=[0x9cb879,0x87a96b,0xd4bd83,0x769d70,0x607c55].map(c=>new THREE.MeshStandardMaterial({color:c,flatShading:true}));for(let x=0;x<32;x++)for(let z=0;z<32;z++){let wx=cx*32+x,wz=cz*32+z,h=this.elevation(wx,wz)*5, water=-.15;let color=h<water?0x78b9b2:h<.1?0xd9c98f:h>2.5?0x969d91:h>1.4?0x82966c:0x9cb879;let m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,flatShading:true}));m.position.set(wx*this.tile,h,wz*this.tile);m.userData={x:wx,z:wz};g.add(m);if(h>0.7&&Math.abs(this.noise(wx*4+80,wz*4+90))>.83&&((hash(this.settings.seed+wx+','+wz)%100)<42)){const t=new THREE.Mesh(new THREE.ConeGeometry(.45,1.8,5),new THREE.MeshStandardMaterial({color:0x3e6848,flatShading:true}));t.position.set(wx*this.tile,h+1,wz*this.tile);g.add(t)}}this.scene.add(g);this.chunks.set(k,g)}
+}
