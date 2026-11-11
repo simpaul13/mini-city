@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as THREE from "three";
-import { World, chunkCoordinate } from "./world";
+import { World, chunkCoordinate } from "../src/world";
 const make = () =>
   new World(new THREE.Scene(), {
     seed: "test",
@@ -52,4 +52,18 @@ describe("world", () => {
     w.dispose();
     expect(w.scene.children.length).toBe(0);
   });
+});
+
+it('restores buildings after eviction with configurable chunk sizes', () => {
+ const scene = new THREE.Scene();
+ const world = new World(scene,{seed:'restore',preset:'Flat Plains',water:0.2,generatorVersion:2,chunkSize:16});
+ world.placed.set('-1,0',{type:'house',rotation:1});
+ world.deleted.add('-1,0');
+ world.sync(-1,0);
+ expect(world.chunks.get('-1,0')?.children.some(o => o.userData.building && o.userData.x === -1)).toBe(true);
+ world.sync(4,4);
+ expect(world.chunks.size).toBe(9);
+ world.sync(-1,0);
+ expect(world.chunks.get('-1,0')?.children.some(o => o.userData.building && o.userData.x === -1)).toBe(true);
+ world.dispose(); expect(scene.children).toHaveLength(0);
 });

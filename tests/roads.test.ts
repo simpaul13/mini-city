@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { roadLine } from "./roads";
+import { roadLine } from "../src/roads";
 it("draws continuous cardinal road cells across signed chunk edges", () => {
   const line = roadLine(-34, -1, 34, 1);
   expect(line[0]).toEqual([-34, -1]);
