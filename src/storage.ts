@@ -1,13 +1,5 @@
-import type { Settings } from "./world";
-
-export type Snapshot = {
-  settings: Settings;
-  placed: [string, { type: string; rotation: number }][];
-  deleted: string[];
-  camera: number[];
-  angle?: number;
-  zoom?: number;
-};
+import { validateSnapshot, type Snapshot } from "./storage/SaveTypes";
+export type { Snapshot } from "./storage/SaveTypes";
 
 const DATABASE = "fieldnotes";
 const STORE = "worlds";
@@ -42,6 +34,7 @@ function transactionCompletion(transaction: IDBTransaction): Promise<void> {
 }
 
 export async function saveSnapshot(snapshot: Snapshot): Promise<void> {
+  validateSnapshot(snapshot);
   const db = await openDatabase();
   try {
     const transaction = db.transaction(STORE, "readwrite");
@@ -65,7 +58,7 @@ export async function loadSnapshot(): Promise<Snapshot | undefined> {
         reject(request.error ?? new Error("Could not read saved city"));
     });
     await completed;
-    return value;
+    return value === undefined ? undefined : validateSnapshot(value);
   } finally {
     db.close();
   }
