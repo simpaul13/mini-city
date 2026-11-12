@@ -6,15 +6,21 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "e2e run",
+    "test:e2e:smoke": "e2e run --tag smoke",
+    "test:e2e:typecheck": "tsc -p tsconfig.e2e.json"
   },
   "dependencies": {
     "simplex-noise": "^4.0.3",
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@e2e-dev/web": "0.15.5",
     "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "26.6.6",
     "@types/three": "^0.180.0",
+    "e2e": "0.23.0",
     "fake-indexeddb": "^6.2.8",
     "tailwindcss": "^4.3.5",
     "typescript": "~5.9.3",
