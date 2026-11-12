@@ -49,6 +49,18 @@ describe('IndexedDB', () => {
   const stored = await new Promise<any>((resolve,reject) => { const request=indexedDB.open('fieldnotes',1); request.onsuccess=()=>{const db=request.result;const tx=db.transaction('worlds');const get=tx.objectStore('worlds').get('latest');get.onsuccess=()=>resolve(get.result);tx.oncomplete=()=>db.close();tx.onerror=()=>reject(tx.error);};request.onerror=()=>reject(request.error); });
   expect(stored).toEqual(legacy);
  });
+ it('round trips an existing v2 save without serializing new generated metadata', async () => {
+  const snapshot = validateSnapshot({ ...legacy, schemaVersion: 2, generatorVersion: 2, settings: { ...legacy.settings, generatorVersion: 2, chunkSize: 16 } });
+  const before = new WorldGenerator(snapshot.settings);
+  const samples = terrain.map(({ x, z }) => before.sample(x, z));
+  await saveSnapshot(snapshot);
+  const loaded = await loadSnapshot();
+  expect(loaded).toEqual(snapshot);
+  expect(loaded).not.toHaveProperty('moisture');
+  expect(loaded).not.toHaveProperty('waterType');
+  const after = new WorldGenerator(loaded!.settings);
+  expect(terrain.map(({ x, z }) => after.sample(x, z))).toEqual(samples);
+ });
  it('round trips snapshots and does not overwrite on invalid input', async () => {
   const snapshot = validateSnapshot(legacy); await saveSnapshot(snapshot);
   expect((await loadSnapshot())?.placed).toEqual(legacy.placed);
