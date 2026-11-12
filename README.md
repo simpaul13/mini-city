@@ -21,12 +21,12 @@ npm test
 ## Browser testing
 
 ```sh
-npm run test:e2e:smoke     # Chromium workflow, no model credentials needed
-npm run test:e2e:ai        # Natural-language workflow; requires model credentials
+npm run test:e2e           # Code-only Chromium tests; no AI agent or API key
+npm run test:e2e:smoke     # Run only smoke-tagged workflows
 ```
 
 See [Browser end-to-end tests](docs/e2e-testing.md) for runtime requirements,
-model setup, coverage, reports and the current AI validation limitation.
+local commands, coverage and reports.
 
 ## Play
 

@@ -1,18 +1,11 @@
 import type { E2EConfig } from "e2e";
 import { web } from "@e2e-dev/web";
-import { gateway } from "ai";
 
 export default {
   tests: "tests/**/*.e2e.ts",
   workers: 1,
   timeout: 180_000,
   assertionTimeout: 15_000,
-  agents: {
-    default: {
-      // Only agent steps call the model; the smoke suite needs no credentials.
-      model: gateway(process.env.E2E_MODEL ?? "openai/gpt-6-luna-fast"),
-    },
-  },
   targets: [{
     name: "desktop-chromium",
     engine: web({
