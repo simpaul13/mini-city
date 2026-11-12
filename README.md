@@ -18,6 +18,16 @@ npm run build
 npm test
 ```
 
+## Browser testing
+
+```sh
+npm run test:e2e:smoke     # Chromium workflow, no model credentials needed
+npm run test:e2e:ai        # Natural-language workflow; requires model credentials
+```
+
+See [Browser end-to-end tests](docs/e2e-testing.md) for runtime requirements,
+model setup, coverage, reports and the current AI validation limitation.
+
 ## Play
 
 Create a seeded world, choose one of four landscapes and set water coverage. Select a tool and click land to construct. Drag the road tool to draw continuous roads. Green/red tile previews indicate whether land can be built on. Transparent models preview structures. Construction clears natural objects at that tile.
